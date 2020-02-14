@@ -30,5 +30,7 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     var migrations = MigrationConfig()
     migrations.add(model: Users.self, database: .sqlite)
     migrations.add(model: Games.self, database: .sqlite)
+    migrations.add(model: Movies.self, database: .sqlite)
+    migrations.add(model: UsersMoviesPivot.self, database: .sqlite)
     services.register(migrations)
 }
