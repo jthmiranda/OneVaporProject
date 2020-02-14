@@ -15,6 +15,7 @@ struct GamesController: RouteCollection {
         gamesRoutes.post(GameUserID.self, at: "createID", use: createGameCreateUserID)
         gamesRoutes.get("allGames", use: queryAllGames)
         gamesRoutes.post(GameUserIDQuery.self, at: "queryGame", use: queryUserGames)
+        gamesRoutes.post(GameUserID.self, at: "updateGame", use: updateGamesData)
     }
 }
 
@@ -46,6 +47,20 @@ func queryAllGames(_ req: Request) throws -> Future<[Games]> {
 func queryUserGames(_ req: Request, query: GameUserIDQuery) throws -> Future<Games> {
     return Users.query(on: req).filter(\.userid == query.userid).first().unwrap(or: Abort(.notFound, reason: "User not found")).flatMap { user in
         return try user.games.query(on: req).filter(\.game == query.game).first().unwrap(or: Abort(.notFound, reason: "User not found"))
+    }
+}
+
+func updateGamesData(_ req: Request, update: GameUserID) throws -> Future<HTTPStatus> {
+    return Users.query(on: req).filter(\.userid == update.userid).first().unwrap(or: Abort(.notFound, reason: "User not found")).flatMap { user in
+        return try user.games
+            .query(on: req).filter(\.game == update.game)
+            .first()
+            .unwrap(or: Abort(.notFound, reason: "User not found"))
+            .flatMap { game in
+                game.level = update.level
+                game.points = update.points
+                return game.update(on: req).transform(to: .ok)
+            }
     }
 }
 
