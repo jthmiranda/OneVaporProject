@@ -22,6 +22,10 @@ final class Users: Codable {
         return children(\.userid)
     }
     
+    var movies: Siblings<Users, Movies, UsersMoviesPivot> {
+        return siblings()
+    }
+    
 }
 
 extension Users: SQLiteUUIDModel {}

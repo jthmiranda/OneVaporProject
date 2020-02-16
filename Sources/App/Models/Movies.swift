@@ -19,8 +19,11 @@ final class Movies: Codable {
         self.year = year
         self.rank = rank
     }
+    
+    var users: Siblings<Movies, Users, UsersMoviesPivot> {
+        return siblings()
+    }
 }
-
 
 extension Movies: SQLiteUUIDModel {}
 extension Movies: Content {}
