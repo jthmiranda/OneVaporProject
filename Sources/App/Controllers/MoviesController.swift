@@ -42,7 +42,7 @@ func queryMovieUser(_ req: Request) throws -> Future<[Movies]> {
         throw Abort(.badRequest, reason: "There's no userid")
     }
     return Users.query(on: req)
-        .filter(\.userid == userid)
+        .filter(\.userid, .like, userid)
         .first()
         .unwrap(or: Abort(.notFound, reason: "There's no user"))
         .flatMap { user in
@@ -55,7 +55,7 @@ func queryUserMovie(_ req: Request) throws -> Future<[Users]> {
         throw Abort(.badRequest, reason: "There's no movie")
     }
     return Movies.query(on: req)
-        .filter(\.title == movie)
+        .filter(\.title, .like, movie)
         .first()
         .unwrap(or: Abort(.notFound, reason: "There's no movie"))
         .flatMap { movie in
