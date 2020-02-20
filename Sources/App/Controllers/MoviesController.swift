@@ -14,6 +14,7 @@ struct MoviesController: RouteCollection {
         moviesRouter.post(Movies.self, at: "create", use: createMovie)
         moviesRouter.post(MovieUser.self, at: "addRelation", use: addMovieUser)
         moviesRouter.get("getMoviesUser", use: queryMovieUser)
+        moviesRouter.get("getUserMovies", use: queryUserMovie)
     }
 }
 
@@ -46,6 +47,19 @@ func queryMovieUser(_ req: Request) throws -> Future<[Movies]> {
         .unwrap(or: Abort(.notFound, reason: "There's no user"))
         .flatMap { user in
             return try user.movies.query(on: req).all()
+        }
+}
+
+func queryUserMovie(_ req: Request) throws -> Future<[Users]> {
+    guard let movie = req.query[String.self, at: "movie"] else {
+        throw Abort(.badRequest, reason: "There's no movie")
+    }
+    return Movies.query(on: req)
+        .filter(\.title == movie)
+        .first()
+        .unwrap(or: Abort(.notFound, reason: "There's no movie"))
+        .flatMap { movie in
+            return try movie.users.query(on: req).all()
         }
 }
 
