@@ -8,4 +8,7 @@ public func routes(_ router: Router) throws {
     
     let gameController = GamesController()
     try router.register(collection: gameController)
+    
+    let moviesController = MoviesController()
+    try router.register(collection: moviesController)
 }
