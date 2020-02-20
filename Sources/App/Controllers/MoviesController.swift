@@ -15,6 +15,7 @@ struct MoviesController: RouteCollection {
         moviesRouter.post(MovieUser.self, at: "addRelation", use: addMovieUser)
         moviesRouter.get("getMoviesUser", use: queryMovieUser)
         moviesRouter.get("getUserMovies", use: queryUserMovie)
+        moviesRouter.get("queryRank", use: queryRank)
     }
 }
 
@@ -61,6 +62,17 @@ func queryUserMovie(_ req: Request) throws -> Future<[Users]> {
         .flatMap { movie in
             return try movie.users.query(on: req).all()
         }
+}
+
+func queryRank(_ req: Request) throws -> Future<[Movies]> {
+    return Movies
+        .query(on: req)
+        .group(.and) {
+            $0.filter(\.rank >= 8).filter(\.rank <= 10)
+        }
+        .range(..<5)
+        .sort(\.title, .descending)
+        .all()
 }
 
 struct MovieUser: Content {
