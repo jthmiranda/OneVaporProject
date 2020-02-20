@@ -11,7 +11,7 @@ import FluentSQLite
 struct MoviesController: RouteCollection {
     func boot(router: Router) throws {
         let moviesRouter = router.grouped("api", "movies")
-        moviesRouter.post(Movies.self, at: "createMovie", use: createMovie)
+        moviesRouter.post(Movies.self, at: "create", use: createMovie)
     }
 }
 
