@@ -6,7 +6,7 @@
 //
 
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 final class Users: Codable {
     var id: UUID?
@@ -28,7 +28,7 @@ final class Users: Codable {
     
 }
 
-extension Users: SQLiteUUIDModel {}
+extension Users: PostgreSQLUUIDModel {}
 extension Users: Migration {}
 extension Users: Content {}
 extension Users: Parameter {}

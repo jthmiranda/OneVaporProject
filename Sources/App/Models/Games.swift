@@ -6,7 +6,7 @@
 //
 
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
 final class Games {
     var id: UUID?
@@ -29,7 +29,7 @@ final class Games {
 }
 
 
-extension Games: SQLiteUUIDModel {}
+extension Games: PostgreSQLUUIDModel {}
 extension Games: Content {}
 extension Games: Migration {}
 extension Games: Parameter {}

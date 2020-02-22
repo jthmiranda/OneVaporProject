@@ -6,9 +6,9 @@
 //
 
 import Vapor
-import FluentSQLite
+import FluentPostgreSQL
 
-final class UsersMoviesPivot: SQLiteUUIDPivot {
+final class UsersMoviesPivot: PostgreSQLUUIDPivot {
     var id: UUID?
     var userID: Users.ID
     var moviesID: Movies.ID
