@@ -29,7 +29,7 @@ func createGameCreateUserID(_ req: Request, game: GameUserID) throws -> Future<G
         .first()
         .unwrap(or: Abort(.notFound, reason: "User not found"))
         .flatMap { user in
-            let newGame = Games(game: game.game, points: game.points, level: game.level, userid: user.id!)
+            let newGame = Games(game: game.game, points: game.points, level: game.level, genre: game.genre, userid: user.id!)
             return newGame.save(on: req)
         }
 }
@@ -73,5 +73,6 @@ struct GameUserID: Content {
     var game: String
     var points: Double
     var level: Int
+    var genre: String
     var userid: String
 }
