@@ -31,7 +31,8 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
     migrations.add(model: Games.self, database: .psql)
     migrations.add(model: Movies.self, database: .psql)
     migrations.add(model: UsersMoviesPivot.self, database: .psql)
-    // After applying a modification please remove the line or keep it commented
-    // migrations.add(model: GameUpdateGenre.self, database: .psql)
+//    After applying a modification please remove the line or keep it commented
+//    migrations.add(model: GameUpdateGenre.self, database: .psql)
+//    migrations.add(model: UserPassword.self, database: .psql)
     services.register(migrations)
 }

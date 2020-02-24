@@ -25,47 +25,52 @@ struct UserController: RouteCollection {
 }
 
 
-func createUser(_ req: Request, user: Users) throws -> Future<HTTPStatus> {
-    return user.save(on: req).transform(to: .created)
+func createUser(_ req: Request, user: Users) throws -> Future<Users.Public> {
+    return user.save(on: req).toPublic()
 }
 
-func queryAllUsers(_ req: Request) throws -> Future<[Users]> {
-    return Users.query(on: req).all()
+func queryAllUsers(_ req: Request) throws -> Future<[Users.Public]> {
+    return Users.query(on: req).decode(data: Users.Public.self).all()
 }
 
-func queryUser(_ req: Request) throws -> Future<Users> {
-    return try req.parameters.next(Users.self)
+func queryUser(_ req: Request) throws -> Future<Users.Public> {
+    return try req.parameters.next(Users.self).toPublic()
 }
 
-func queryUserId(_ req: Request, user: userIDQuery) throws -> Future<Users> {
+func queryUserId(_ req: Request, user: userIDQuery) throws -> Future<Users.Public> {
     return Users.query(on: req)
         .filter(\.userid == user.userID)
         .first()
         .unwrap(or: Abort(.notFound, reason: "No existe el userid proporcionado"))
+        .toPublic()
 }
 
-func queryUserIdGet(_ req: Request) throws -> Future<Users> {
+func queryUserIdGet(_ req: Request) throws -> Future<Users.Public> {
     guard let userid = req.query[String.self, at: "userID"] else {
         throw Abort(HTTPStatus.badRequest, reason: "No existe el parámetro mensaje en la llamada")
     }
-    return Users.query(on: req).filter(\.userid == userid).first().unwrap(or: Abort(.notFound, reason: "No existe el userid proporcionado"))
+    return Users.query(on: req)
+        .filter(\.userid == userid)
+        .first()
+        .unwrap(or: Abort(.notFound, reason: "No existe el userid proporcionado"))
+        .toPublic()
 }
 
-func updateUserID(_ req: Request, update: UpdateQuery) throws -> Future<Users> {
+func updateUserID(_ req: Request, update: UpdateQuery) throws -> Future<Users.Public> {
     return Users.query(on: req)
         .filter(\.userid == update.userid)
         .first()
         .unwrap(or: Abort(.notFound, reason: "No existe el userid proporcionado"))
         .flatMap { user in
             user.userid = update.newUserid
-            return user.update(on: req)
+            return user.update(on: req).toPublic()
         }
 }
 
-func updateUserIDParam(_ req: Request) throws -> Future<Users> {
+func updateUserIDParam(_ req: Request) throws -> Future<Users.Public> {
     return try flatMap(req.parameters.next(Users.self), req.content.decode(userIDQuery.self)) { (user, new) in
         user.userid = new.userID
-        return user.update(on: req)
+        return user.update(on: req).toPublic()
     }
 }
 
