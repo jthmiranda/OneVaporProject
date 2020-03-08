@@ -7,6 +7,7 @@
 
 import Vapor
 import FluentPostgreSQL
+import Authentication
 
 final class Users: Codable {
     var id: UUID?
@@ -51,6 +52,16 @@ extension Users: Content {}
 extension Users: Parameter {}
 
 extension Users.Public: Content {}
+
+extension Users: BasicAuthenticatable {
+    static var usernameKey: WritableKeyPath<Users, String> {
+        return \.userid
+    }
+    
+    static var passwordKey: WritableKeyPath<Users, String> {
+        return \.password
+    }
+}
 
 extension Future where T: Users {
     func toPublic() -> Future<Users.Public> {
