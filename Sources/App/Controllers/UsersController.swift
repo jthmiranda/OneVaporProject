@@ -7,9 +7,15 @@
 
 import Vapor
 import FluentSQLite
+import Crypto
+import Authentication
 
 struct UserController: RouteCollection {
     func boot(router: Router) throws {
+        let basicAuthMiddleware = Users.basicAuthMiddleware(using: BCryptDigest())
+        let guardAuthMiddleware = Users.guardAuthMiddleware()
+        let basicAuthGroup = router.grouped("apis").grouped(basicAuthMiddleware, guardAuthMiddleware)
+        
         let userRoutes = router.grouped("api", "user")
         
         userRoutes.post(Users.self, at: "create", use: createUser)
@@ -24,6 +30,10 @@ struct UserController: RouteCollection {
     }
 }
 
+func testAuth(_ req: Request) throws -> Future<HTTPStatus> {
+    let user = try req.requireAuthenticated(Users.self)
+    return req.future(HTTPStatus.ok)
+}
 
 func createUser(_ req: Request, user: Users) throws -> Future<Users.Public> {
     return user.save(on: req).toPublic()
