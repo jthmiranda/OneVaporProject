@@ -36,5 +36,6 @@ public func configure(_ config: inout Config, _ env: inout Environment, _ servic
 //    After applying a modification please remove the line or keep it commented
 //    migrations.add(model: GameUpdateGenre.self, database: .psql)
 //    migrations.add(model: UserPassword.self, database: .psql)
+    migrations.add(model: Token.self, database: .psql)
     services.register(migrations)
 }

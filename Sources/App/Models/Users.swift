@@ -63,6 +63,11 @@ extension Users: BasicAuthenticatable {
     }
 }
 
+// After creating Token table, we implmente this extension without setting the relationship to Token table
+extension Users: TokenAuthenticatable {
+    typealias TokenType = Token
+}
+
 extension Future where T: Users {
     func toPublic() -> Future<Users.Public> {
         return map(to: Users.Public.self) { user in

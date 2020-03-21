@@ -15,7 +15,7 @@ struct UserController: RouteCollection {
         let basicAuthMiddleware = Users.basicAuthMiddleware(using: BCryptDigest())
         let guardAuthMiddleware = Users.guardAuthMiddleware()
         let basicAuthGroup = router.grouped("apis").grouped(basicAuthMiddleware, guardAuthMiddleware)
-        basicAuthGroup.get("testAuth", use: testAuth)
+        basicAuthGroup.get("login", use: login)
         
         let userRoutes = router.grouped("api", "user")
         
@@ -31,9 +31,13 @@ struct UserController: RouteCollection {
     }
 }
 
-func testAuth(_ req: Request) throws -> Future<HTTPStatus> {
-    let _ = try req.requireAuthenticated(Users.self)
-    return req.future(HTTPStatus.ok)
+func login(_ req: Request) throws -> Future<TokenResponse> {
+    let user = try req.requireAuthenticated(Users.self)
+    let token = try Token.generate(for: user)
+    return token.save(on: req)
+        .map { tokenInfo in
+            return TokenResponse(token: tokenInfo.token, username: user.name)
+        }
 }
 
 func createUser(_ req: Request, user: Users) throws -> Future<Users.Public> {
@@ -131,4 +135,10 @@ struct userIDQuery: Content {
 struct UpdateQuery: Content {
     let userid: String
     let newUserid: String
+}
+
+// Token: creating a struct to send this object info to the client
+struct TokenResponse: Content {
+    let token: String
+    let username: String
 }
