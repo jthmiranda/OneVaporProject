@@ -18,16 +18,21 @@ struct UserController: RouteCollection {
         basicAuthGroup.get("login", use: login)
         
         let userRoutes = router.grouped("api", "user")
-        
         userRoutes.post(Users.self, at: "create", use: createUser)
-        userRoutes.get("queryAll", use: queryAllUsers)
-        userRoutes.get("query", Users.parameter, use: queryUser)
-        userRoutes.post(userIDQuery.self, at: "queryUserID", use: queryUserId)
-        userRoutes.get("queryUserID", use: queryUserIdGet)
-        userRoutes.put(UpdateQuery.self, at: "update", use: updateUserID)
-        userRoutes.put("updateID", Users.parameter, use: updateUserIDParam)
-        userRoutes.delete("delete", Users.parameter, use: deleteUserIDParam)
-        userRoutes.post(userIDQuery.self, at: "delete", use: deleteUserID)
+        
+        
+        let userAuthRoutes = router.grouped("api", "userCRUD")
+        let tokenAuthMiddleware = Users.tokenAuthMiddleware()
+        let tokenAuthGroup = userAuthRoutes.grouped(tokenAuthMiddleware, guardAuthMiddleware)
+        
+        tokenAuthGroup.get("queryAll", use: queryAllUsers)
+        tokenAuthGroup.get("query", Users.parameter, use: queryUser)
+        tokenAuthGroup.post(userIDQuery.self, at: "queryUserID", use: queryUserId)
+        tokenAuthGroup.get("queryUserID", use: queryUserIdGet)
+        tokenAuthGroup.put(UpdateQuery.self, at: "update", use: updateUserID)
+        tokenAuthGroup.put("updateID", Users.parameter, use: updateUserIDParam)
+        tokenAuthGroup.delete("delete", Users.parameter, use: deleteUserIDParam)
+        tokenAuthGroup.post(userIDQuery.self, at: "delete", use: deleteUserID)
     }
 }
 
@@ -46,6 +51,7 @@ func createUser(_ req: Request, user: Users) throws -> Future<Users.Public> {
 }
 
 func queryAllUsers(_ req: Request) throws -> Future<[Users.Public]> {
+    let _ = try req.requireAuthenticated(Users.self)
     return Users.query(on: req).decode(data: Users.Public.self).all()
 }
 
