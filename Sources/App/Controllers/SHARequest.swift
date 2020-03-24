@@ -31,7 +31,7 @@ struct SHARequest: RouteCollection {
     
 }
 
-func userRequestSafe(_ req: Request, data: JSON_AES) throws -> Future<Users> {
+func userRequestSafe(_ req: Request, data: JSON_AES) throws -> Future<Users.Public> {
     guard let dataContent = Data(base64Encoded: data.content), let tagData = Data(base64Encoded: data.tag) else {
         throw Abort(.badRequest, reason: "Bad Request")
     }
@@ -50,5 +50,6 @@ func userRequestSafe(_ req: Request, data: JSON_AES) throws -> Future<Users> {
         .filter(\.userid == dataJSON.userID)
         .first()
         .unwrap(or: Abort(.notFound, reason: "Username not found"))
+        .toPublic()
     
 }
