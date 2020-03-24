@@ -25,6 +25,8 @@ struct UserController: RouteCollection {
         let tokenAuthMiddleware = Users.tokenAuthMiddleware()
         let tokenAuthGroup = userAuthRoutes.grouped(tokenAuthMiddleware, guardAuthMiddleware)
         
+        tokenAuthGroup.get("renewToken", use: login)
+        tokenAuthGroup.get("logout", use: logout)
         tokenAuthGroup.get("queryAll", use: queryAllUsers)
         tokenAuthGroup.get("query", Users.parameter, use: queryUser)
         tokenAuthGroup.post(userIDQuery.self, at: "queryUserID", use: queryUserId)
@@ -39,10 +41,24 @@ struct UserController: RouteCollection {
 func login(_ req: Request) throws -> Future<TokenResponse> {
     let user = try req.requireAuthenticated(Users.self)
     let token = try Token.generate(for: user)
-    return token.save(on: req)
-        .map { tokenInfo in
-            return TokenResponse(token: tokenInfo.token, username: user.name)
+    return try Token.query(on: req)
+        .filter(\.userID == user.requireID())
+        .delete()
+        .flatMap { _ in
+            return token.save(on: req)
+                .map { tokenInfo in
+                    return TokenResponse(token: tokenInfo.token, username: user.name)
+                }
         }
+    
+}
+
+func logout(_ req: Request) throws -> Future<HTTPStatus> {
+    let user = try req.requireAuthenticated(Users.self)
+    return try Token.query(on: req)
+        .filter(\.userID == user.requireID())
+        .delete()
+        .transform(to: HTTPStatus.ok)
 }
 
 func createUser(_ req: Request, user: Users) throws -> Future<Users.Public> {
