@@ -11,4 +11,7 @@ public func routes(_ router: Router) throws {
     
     let moviesController = MoviesController()
     try router.register(collection: moviesController)
+    
+    let safeController = SHARequest()
+    try router.register(collection: safeController)
 }
